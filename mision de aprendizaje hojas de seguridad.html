@@ -1,0 +1,1403 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#f8fafc" />
+  <title>Quest Log | TDS vs SDS</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ["Inter", "system-ui", "sans-serif"]
+          },
+          boxShadow: {
+            soft: "0 18px 55px rgba(15,23,42,.12)",
+            float: "0 12px 30px rgba(15,23,42,.16)"
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    :root {
+      --ink: #172033;
+      --muted: #64748b;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      overflow-x: hidden;
+      background:
+        radial-gradient(circle at 12% 8%, rgba(56,189,248,.18), transparent 25rem),
+        radial-gradient(circle at 88% 16%, rgba(249,115,22,.16), transparent 25rem),
+        linear-gradient(180deg,#f8fafc,#eef2ff 52%,#f8fafc);
+    }
+
+    .glass {
+      background: rgba(255,255,255,.82);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+
+    .card-lift {
+      transition: transform .25s ease, box-shadow .25s ease;
+    }
+
+    .card-lift:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 22px 55px rgba(15,23,42,.15);
+    }
+
+    .mission-card {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .mission-card::after {
+      content: "";
+      position: absolute;
+      width: 145px;
+      height: 145px;
+      border-radius: 999px;
+      right: -58px;
+      bottom: -72px;
+      background: rgba(255,255,255,.35);
+    }
+
+    .float {
+      animation: floaty 5.5s ease-in-out infinite;
+    }
+
+    .float-delay {
+      animation: floaty 7s ease-in-out infinite 1s;
+    }
+
+    .pulse-soft {
+      animation: softPulse 2.2s ease-in-out infinite;
+    }
+
+    .spark {
+      animation: sparkle 3.5s ease-in-out infinite;
+    }
+
+    .progress-shine {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .progress-shine::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      transform: translateX(-120%);
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255,255,255,.7),
+        transparent
+      );
+      animation: shine 2.5s infinite;
+    }
+
+    .slide-in {
+      animation: slideIn .4s ease both;
+    }
+
+    .shake {
+      animation: shake .35s ease;
+    }
+
+    .correct-flash {
+      animation: good .5s ease;
+    }
+
+    .wrong-flash {
+      animation: bad .5s ease;
+    }
+
+    .illustration-grid {
+      background-image:
+        linear-gradient(rgba(255,255,255,.82),rgba(255,255,255,.82)),
+        url("https://images.unsplash.com/photo-1581093588401-fbb62a02f120?auto=format&fit=crop&w=1600&q=70");
+      background-size: cover;
+      background-position: center;
+    }
+
+    .lab-bg {
+      background-image:
+        linear-gradient(rgba(239,246,255,.82),rgba(239,246,255,.9)),
+        url("https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?auto=format&fit=crop&w=1600&q=70");
+      background-size: cover;
+      background-position: center;
+    }
+
+    .hotel-bg {
+      background-image:
+        linear-gradient(rgba(255,247,237,.83),rgba(255,247,237,.92)),
+        url("https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1600&q=70");
+      background-size: cover;
+      background-position: center;
+    }
+
+    .warehouse-bg {
+      background-image:
+        linear-gradient(rgba(240,253,250,.82),rgba(240,253,250,.92)),
+        url("https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=1600&q=70");
+      background-size: cover;
+      background-position: center;
+    }
+
+    .safety-bg {
+      background-image:
+        linear-gradient(rgba(254,242,242,.82),rgba(254,242,242,.92)),
+        url("https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=1600&q=70");
+      background-size: cover;
+      background-position: center;
+    }
+
+    .certificate {
+      background:
+        radial-gradient(circle at 0 0, rgba(14,165,233,.12), transparent 35%),
+        radial-gradient(circle at 100% 100%, rgba(249,115,22,.13), transparent 35%),
+        linear-gradient(135deg,#fff,#f8fafc);
+    }
+
+    .cert-border {
+      border: 10px solid transparent;
+      border-image: linear-gradient(135deg,#0284c7,#7c3aed,#f97316) 1;
+    }
+
+    .scrollbar-thin::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .scrollbar-thin::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 999px;
+    }
+
+    @keyframes floaty {
+      0%,100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-14px) rotate(2deg); }
+    }
+
+    @keyframes softPulse {
+      0%,100% { transform: scale(1); opacity:1; }
+      50% { transform: scale(1.05); opacity:.87; }
+    }
+
+    @keyframes sparkle {
+      0%,100% { opacity:.3; transform: scale(.9) rotate(0deg); }
+      50% { opacity:1; transform: scale(1.15) rotate(8deg); }
+    }
+
+    @keyframes shine {
+      to { transform: translateX(120%); }
+    }
+
+    @keyframes slideIn {
+      from { opacity:0; transform: translateY(14px); }
+      to { opacity:1; transform: translateY(0); }
+    }
+
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      25% { transform: translateX(-8px); }
+      75% { transform: translateX(8px); }
+    }
+
+    @keyframes good {
+      0% { box-shadow:0 0 0 rgba(34,197,94,0); }
+      50% { box-shadow:0 0 0 10px rgba(34,197,94,.16); }
+      100% { box-shadow:0 0 0 rgba(34,197,94,0); }
+    }
+
+    @keyframes bad {
+      0% { box-shadow:0 0 0 rgba(239,68,68,0); }
+      50% { box-shadow:0 0 0 10px rgba(239,68,68,.14); }
+      100% { box-shadow:0 0 0 rgba(239,68,68,0); }
+    }
+
+    @media (max-width: 640px) {
+      .mission-card::after {
+        width: 100px;
+        height: 100px;
+      }
+    }
+
+    @media print {
+      body {
+        background: #fff !important;
+      }
+
+      body * {
+        visibility: hidden !important;
+      }
+
+      #certificatePrint,
+      #certificatePrint * {
+        visibility: visible !important;
+      }
+
+      #certificatePrint {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        min-height: 100vh;
+        box-shadow: none !important;
+      }
+
+      .no-print {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+
+<body class="min-h-screen">
+
+  <!-- DECORACIÓN -->
+  <div class="fixed inset-0 pointer-events-none overflow-hidden z-0">
+    <div class="absolute top-16 left-[4%] w-20 h-20 rounded-3xl bg-sky-200/50 rotate-12 float"></div>
+    <div class="absolute top-[28%] right-[5%] w-16 h-16 rounded-full bg-orange-200/60 float-delay"></div>
+    <div class="absolute bottom-[12%] left-[8%] w-14 h-14 bg-violet-200/60 rounded-2xl rotate-12 spark"></div>
+  </div>
+
+  <!-- LOGIN -->
+  <section id="loginScreen" class="relative z-10 min-h-screen flex items-center justify-center p-4 sm:p-6">
+    <div class="w-full max-w-5xl grid lg:grid-cols-[1.05fr_.95fr] overflow-hidden rounded-[2rem] shadow-soft border border-white/70">
+
+      <div class="illustration-grid p-6 sm:p-10 lg:p-12 min-h-[430px] flex flex-col justify-between">
+        <div>
+          <span class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 border border-sky-200 text-sky-800 font-semibold text-sm">
+            🧭 Quest Log Profesional
+          </span>
+
+          <h1 class="mt-6 text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight max-w-xl">
+            Misión:
+            <span class="text-sky-700">TDS vs SDS</span>
+          </h1>
+
+          <p class="mt-5 text-slate-700 leading-relaxed max-w-xl text-sm sm:text-base lg:text-lg">
+            Supera cinco misiones para reconocer cuándo necesitas una
+            <strong>Ficha Técnica</strong> y cuándo necesitas una
+            <strong>Hoja de Seguridad</strong>.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-3 gap-3 mt-8 max-w-lg">
+          <div class="glass rounded-2xl p-4 text-center">
+            <div class="text-2xl">📄</div>
+            <div class="text-xs sm:text-sm font-bold mt-1">TDS</div>
+          </div>
+          <div class="glass rounded-2xl p-4 text-center">
+            <div class="text-2xl">⚠️</div>
+            <div class="text-xs sm:text-sm font-bold mt-1">SDS</div>
+          </div>
+          <div class="glass rounded-2xl p-4 text-center">
+            <div class="text-2xl">🏆</div>
+            <div class="text-xs sm:text-sm font-bold mt-1">Certificado</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white p-6 sm:p-10 lg:p-12 flex items-center">
+        <div class="w-full">
+          <p class="text-sm font-bold uppercase tracking-[.2em] text-violet-600">
+            Registro del aventurero
+          </p>
+
+          <h2 class="mt-2 text-2xl sm:text-3xl font-black">
+            ¿Quién inicia la misión?
+          </h2>
+
+          <p class="mt-3 text-slate-500">
+            Tu nombre aparecerá en el certificado final y en el reporte de respuestas.
+          </p>
+
+          <label for="participantName" class="block mt-8 text-sm font-bold text-slate-700">
+            Nombre completo
+          </label>
+
+          <input
+            id="participantName"
+            type="text"
+            autocomplete="name"
+            maxlength="80"
+            placeholder="Ej. María González"
+            class="mt-2 w-full px-4 py-4 rounded-2xl border-2 border-slate-200 outline-none focus:border-violet-500 focus:ring-4 focus:ring-violet-100 transition"
+          />
+
+          <button
+            id="startBtn"
+            class="mt-5 w-full rounded-2xl bg-gradient-to-r from-sky-600 via-violet-600 to-fuchsia-600 text-white px-5 py-4 font-black shadow-lg hover:scale-[1.015] active:scale-[.99] transition"
+          >
+            Iniciar Quest Log →
+          </button>
+
+          <p id="loginError" class="hidden mt-3 text-sm text-red-600 font-semibold">
+            Escribe tu nombre para comenzar.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- APP -->
+  <main id="appScreen" class="relative z-10 hidden min-h-screen pb-24">
+
+    <!-- HEADER -->
+    <header class="sticky top-0 z-40 glass border-b border-white/80">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex flex-wrap items-center gap-3 justify-between">
+
+        <div class="min-w-0">
+          <p class="text-xs uppercase tracking-[.2em] font-bold text-sky-700">
+            Quest Log • Seguridad Química
+          </p>
+          <h2 class="font-black text-lg sm:text-xl truncate">
+            <span id="headerName">Participante</span>
+          </h2>
+        </div>
+
+        <div class="flex items-center gap-2 sm:gap-3">
+          <div class="px-3 sm:px-4 py-2 rounded-xl bg-amber-50 border border-amber-200">
+            <div class="text-[10px] uppercase font-bold text-amber-700">XP</div>
+            <div id="xpHeader" class="text-sm font-black text-amber-800">0 / 500</div>
+          </div>
+
+          <button
+            id="resetBtn"
+            class="px-3 py-2 rounded-xl bg-white border border-slate-200 text-xs sm:text-sm font-bold hover:bg-slate-50"
+          >
+            Reiniciar
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6">
+
+      <!-- HERO -->
+      <section class="mt-6 rounded-[2rem] overflow-hidden shadow-soft border border-white bg-gradient-to-br from-sky-100 via-indigo-50 to-orange-50 relative">
+        <div class="absolute right-6 top-5 text-5xl opacity-30 float">🧪</div>
+        <div class="absolute right-24 bottom-4 text-4xl opacity-25 float-delay">🧤</div>
+
+        <div class="relative p-5 sm:p-8 lg:p-10 grid lg:grid-cols-[1fr_.82fr] gap-7 items-center">
+          <div>
+            <span class="inline-flex px-3 py-1.5 rounded-full bg-white/80 border border-sky-200 text-xs font-bold text-sky-700">
+              🎯 Objetivo de aprendizaje
+            </span>
+
+            <h1 class="mt-4 text-2xl sm:text-4xl font-black tracking-tight">
+              Distingue una
+              <span class="text-sky-700">Ficha Técnica</span>
+              de una
+              <span class="text-orange-600">Hoja de Seguridad</span>
+            </h1>
+
+            <p class="mt-4 text-sm sm:text-base text-slate-600 leading-relaxed max-w-3xl">
+              Cada misión presenta una situación profesional. Responde, revisa la
+              retroalimentación y continúa. Una respuesta incorrecta
+              <strong>no bloquea</strong> tu avance.
+            </p>
+          </div>
+
+          <div class="bg-white/80 rounded-3xl p-5 sm:p-6 border border-white shadow-md">
+            <div class="flex justify-between gap-4 text-sm">
+              <span class="font-bold">Rango de Aventurero</span>
+              <span id="rankLabel" class="font-black text-violet-700">Explorador</span>
+            </div>
+
+            <div class="mt-3 h-4 rounded-full bg-slate-200 overflow-hidden">
+              <div
+                id="rankProgress"
+                class="progress-shine h-full rounded-full bg-gradient-to-r from-sky-500 via-violet-500 to-fuchsia-500 transition-all duration-700"
+                style="width: 0%"
+              ></div>
+            </div>
+
+            <div class="mt-2 flex justify-between text-xs text-slate-500">
+              <span id="missionsProgressText">0 de 5 misiones</span>
+              <span id="scoreMini">0 / 100</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- RESUMEN TDS / SDS -->
+      <section class="mt-7 grid lg:grid-cols-2 gap-4">
+        <article class="rounded-[1.7rem] bg-sky-50 border border-sky-200 p-5 sm:p-6 card-lift">
+          <div class="flex items-start gap-4">
+            <div class="w-12 h-12 shrink-0 rounded-2xl bg-sky-600 text-white flex items-center justify-center text-2xl shadow-md">
+              📘
+            </div>
+            <div>
+              <p class="text-xs uppercase font-black tracking-[.16em] text-sky-700">
+                Ficha Técnica
+              </p>
+              <h3 class="text-xl font-black mt-1">TDS • Technical Data Sheet</h3>
+              <p class="mt-2 text-sm text-slate-600 leading-relaxed">
+                Explica principalmente <strong>qué es el producto, cómo se utiliza,
+                sus características técnicas, dosis, rendimiento y condiciones de uso.</strong>
+              </p>
+            </div>
+          </div>
+        </article>
+
+        <article class="rounded-[1.7rem] bg-orange-50 border border-orange-200 p-5 sm:p-6 card-lift">
+          <div class="flex items-start gap-4">
+            <div class="w-12 h-12 shrink-0 rounded-2xl bg-orange-500 text-white flex items-center justify-center text-2xl shadow-md">
+              ⚠️
+            </div>
+            <div>
+              <p class="text-xs uppercase font-black tracking-[.16em] text-orange-700">
+                Hoja de Seguridad
+              </p>
+              <h3 class="text-xl font-black mt-1">SDS • Safety Data Sheet</h3>
+              <p class="mt-2 text-sm text-slate-600 leading-relaxed">
+                Describe <strong>peligros, exposición, primeros auxilios, incendio,
+                derrames, EPP, almacenamiento, transporte y demás información de seguridad.</strong>
+              </p>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <!-- QUEST LIST -->
+      <section class="mt-8">
+        <div class="flex flex-wrap gap-3 items-end justify-between">
+          <div>
+            <p class="text-xs uppercase tracking-[.2em] font-black text-violet-600">
+              Misiones disponibles
+            </p>
+            <h2 class="text-2xl sm:text-3xl font-black mt-1">
+              Tu tablero de Quest Log
+            </h2>
+          </div>
+
+          <div id="completionBadge" class="hidden px-4 py-2 rounded-full bg-emerald-100 border border-emerald-200 text-emerald-800 text-sm font-black">
+            ✓ Todas las misiones completadas
+          </div>
+        </div>
+
+        <div id="missionGrid" class="mt-5 grid md:grid-cols-2 xl:grid-cols-3 gap-4"></div>
+      </section>
+
+      <!-- COMPARATIVO -->
+      <section class="mt-9 rounded-[2rem] bg-white border border-slate-200 shadow-soft overflow-hidden">
+        <div class="p-5 sm:p-7 border-b bg-gradient-to-r from-slate-50 to-blue-50">
+          <p class="text-xs uppercase font-black tracking-[.18em] text-blue-700">
+            Referencia rápida
+          </p>
+          <h2 class="mt-1 text-2xl font-black">TDS vs SDS</h2>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full min-w-[720px] text-sm">
+            <thead>
+              <tr class="bg-slate-900 text-white text-left">
+                <th class="p-4">Aspecto</th>
+                <th class="p-4">Ficha Técnica / TDS</th>
+                <th class="p-4">Hoja de Seguridad / SDS</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="border-b">
+                <td class="p-4 font-bold">Objetivo</td>
+                <td class="p-4">Explicar desempeño, características y uso.</td>
+                <td class="p-4">Comunicar peligros y medidas de prevención.</td>
+              </tr>
+              <tr class="border-b bg-slate-50">
+                <td class="p-4 font-bold">Enfoque</td>
+                <td class="p-4">Técnico, comercial y operacional.</td>
+                <td class="p-4">Salud, seguridad y ambiente.</td>
+              </tr>
+              <tr class="border-b">
+                <td class="p-4 font-bold">Uso típico</td>
+                <td class="p-4">Dosificación, rendimiento, superficies, características.</td>
+                <td class="p-4">Peligros, EPP, primeros auxilios, incendio y derrames.</td>
+              </tr>
+              <tr class="border-b bg-slate-50">
+                <td class="p-4 font-bold">Toxicidad y peligros</td>
+                <td class="p-4">Puede incluir información limitada, según fabricante.</td>
+                <td class="p-4">Forma parte de la comunicación formal de peligros.</td>
+              </tr>
+              <tr>
+                <td class="p-4 font-bold">Pregunta clave</td>
+                <td class="p-4">“¿Cómo uso correctamente este producto?”</td>
+                <td class="p-4">“¿Cómo trabajo de forma segura con este producto?”</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- MODAL DE RETO -->
+  <div id="questModal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-slate-950/55 backdrop-blur-sm"></div>
+
+    <div class="relative min-h-full flex items-center justify-center p-3 sm:p-6">
+      <div
+        id="questPanel"
+        class="w-full max-w-4xl max-h-[94vh] overflow-y-auto scrollbar-thin rounded-[2rem] bg-white shadow-2xl slide-in"
+      ></div>
+    </div>
+  </div>
+
+  <!-- MODAL FINAL -->
+  <div id="finalModal" class="fixed inset-0 z-[60] hidden overflow-y-auto bg-slate-950/70 p-3 sm:p-6">
+    <div class="max-w-5xl mx-auto my-4">
+      <div class="bg-white rounded-[2rem] overflow-hidden shadow-2xl">
+
+        <div class="no-print p-5 sm:p-7 bg-gradient-to-r from-sky-100 via-violet-100 to-orange-100">
+          <div class="flex flex-wrap gap-4 items-center justify-between">
+            <div>
+              <p class="text-xs font-black uppercase tracking-[.2em] text-violet-700">
+                Quest completado
+              </p>
+              <h2 class="text-2xl sm:text-3xl font-black mt-1">
+                Resultado final
+              </h2>
+            </div>
+
+            <button
+              id="closeFinalBtn"
+              class="px-4 py-2 rounded-xl bg-white border border-slate-200 font-bold"
+            >
+              Cerrar
+            </button>
+          </div>
+        </div>
+
+        <div id="certificatePrint" class="certificate cert-border m-3 sm:m-6 rounded-xl p-5 sm:p-10">
+          <div class="text-center">
+            <div class="text-5xl">🏆</div>
+
+            <p class="mt-3 text-xs sm:text-sm uppercase tracking-[.28em] font-black text-violet-700">
+              Certificado de finalización
+            </p>
+
+            <h1 class="mt-4 text-3xl sm:text-5xl font-black">
+              Quest Log: TDS vs SDS
+            </h1>
+
+            <p class="mt-6 text-slate-600">Se certifica que</p>
+
+            <h2 id="certName" class="mt-2 text-2xl sm:text-4xl font-black text-sky-700 break-words">
+              Participante
+            </h2>
+
+            <p class="mt-5 max-w-3xl mx-auto text-sm sm:text-base text-slate-600 leading-relaxed">
+              completó las cinco misiones de identificación y diferenciación
+              entre Ficha Técnica (TDS) y Hoja de Seguridad (SDS).
+            </p>
+
+            <div class="mt-8 grid sm:grid-cols-3 gap-3 max-w-3xl mx-auto">
+              <div class="rounded-2xl bg-white border border-slate-200 p-4">
+                <div class="text-xs uppercase font-black text-slate-500">Puntaje</div>
+                <div id="certScore" class="text-3xl font-black text-violet-700 mt-1">0</div>
+                <div class="text-xs text-slate-400">de 100</div>
+              </div>
+
+              <div class="rounded-2xl bg-white border border-slate-200 p-4">
+                <div class="text-xs uppercase font-black text-slate-500">Respuestas</div>
+                <div id="certCorrect" class="text-3xl font-black text-emerald-600 mt-1">0/5</div>
+                <div class="text-xs text-slate-400">correctas</div>
+              </div>
+
+              <div class="rounded-2xl bg-white border border-slate-200 p-4">
+                <div class="text-xs uppercase font-black text-slate-500">Rango</div>
+                <div id="certRank" class="text-lg font-black text-orange-600 mt-2">
+                  Explorador
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-8 pt-6 border-t border-slate-200">
+              <p class="text-xs text-slate-400">
+                Documento generado automáticamente por la actividad educativa interactiva.
+              </p>
+              <p id="certDate" class="mt-1 text-xs font-bold text-slate-500"></p>
+            </div>
+          </div>
+
+          <!-- REPORTE DE RESPUESTAS -->
+          <section class="mt-10 text-left">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center">
+                📋
+              </div>
+              <div>
+                <p class="text-xs uppercase tracking-[.16em] font-black text-slate-500">
+                  Hoja adjunta
+                </p>
+                <h3 class="font-black text-xl">Resumen de respuestas</h3>
+              </div>
+            </div>
+
+            <div id="answerReport" class="mt-5 space-y-3"></div>
+          </section>
+        </div>
+
+        <div class="no-print p-5 sm:p-7 flex flex-wrap gap-3 justify-center border-t">
+          <button
+            onclick="window.print()"
+            class="px-5 py-3 rounded-2xl bg-slate-900 text-white font-black hover:bg-slate-800"
+          >
+            🖨️ Descargar / Guardar certificado PDF
+          </button>
+
+          <button
+            id="restartFinalBtn"
+            class="px-5 py-3 rounded-2xl bg-violet-100 text-violet-800 font-black hover:bg-violet-200"
+          >
+            ↻ Realizar nuevamente
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // =========================================================
+    // DATOS DE LA ACTIVIDAD
+    // =========================================================
+
+    const QUESTS = [
+      {
+        id: 1,
+        title: "El pedido de Housekeeping",
+        subtitle: "Selecciona el documento correcto",
+        icon: "🧴",
+        xp: 100,
+        theme: {
+          card: "from-sky-100 to-cyan-50",
+          pill: "bg-sky-100 text-sky-700",
+          button: "bg-sky-600 hover:bg-sky-700",
+          sceneClass: "hotel-bg"
+        },
+        context:
+          "Housekeeping recibe un nuevo desinfectante concentrado. El supervisor quiere entrenar al personal para saber cuánto producto debe diluir por cada litro de agua y sobre qué superficies puede utilizarse.",
+        question:
+          "¿Qué documento es el más apropiado para consultar principalmente la dosificación, rendimiento y modo de empleo?",
+        options: [
+          "Ficha Técnica / TDS",
+          "Hoja de Seguridad / SDS",
+          "Orden de compra",
+          "Factura comercial"
+        ],
+        correct: 0,
+        explanation:
+          "La Ficha Técnica es el documento orientado al desempeño y al uso técnico del producto. Allí suelen consultarse características, dosificación, rendimiento, aplicaciones y condiciones recomendadas por el fabricante."
+      },
+      {
+        id: 2,
+        title: "Derrame en bodega",
+        subtitle: "Decisión de seguridad",
+        icon: "🚨",
+        xp: 100,
+        theme: {
+          card: "from-orange-100 to-rose-50",
+          pill: "bg-orange-100 text-orange-700",
+          button: "bg-orange-500 hover:bg-orange-600",
+          sceneClass: "safety-bg"
+        },
+        context:
+          "Durante el traslado de un químico se rompe un envase. El responsable necesita revisar medidas ante derrames, riesgos para el personal y el EPP recomendado.",
+        question:
+          "¿Cuál documento debe consultar?",
+        options: [
+          "Catálogo del proveedor",
+          "Ficha Técnica / TDS",
+          "Hoja de Seguridad / SDS",
+          "Lista de precios"
+        ],
+        correct: 2,
+        explanation:
+          "La SDS contiene información de seguridad relacionada con peligros, controles de exposición, EPP, manejo de derrames, primeros auxilios e incendios."
+      },
+      {
+        id: 3,
+        title: "Auditoría documental",
+        subtitle: "Identifica las 16 secciones",
+        icon: "📚",
+        xp: 100,
+        theme: {
+          card: "from-violet-100 to-fuchsia-50",
+          pill: "bg-violet-100 text-violet-700",
+          button: "bg-violet-600 hover:bg-violet-700",
+          sceneClass: "lab-bg"
+        },
+        context:
+          "Durante una revisión documental, el equipo solicita un documento estructurado con identificación del producto, peligros, composición, primeros auxilios, incendio, derrames, manejo, almacenamiento, exposición, propiedades físico-químicas, toxicología, transporte y regulación.",
+        question:
+          "¿Qué documento responde a esta estructura?",
+        options: [
+          "TDS",
+          "SDS",
+          "Certificado de análisis",
+          "Ficha comercial"
+        ],
+        correct: 1,
+        explanation:
+          "La SDS utiliza una estructura estandarizada de 16 secciones para organizar la información de seguridad química."
+      },
+      {
+        id: 4,
+        title: "El mito del 'biodegradable'",
+        subtitle: "Analiza la información",
+        icon: "🌱",
+        xp: 100,
+        theme: {
+          card: "from-emerald-100 to-lime-50",
+          pill: "bg-emerald-100 text-emerald-700",
+          button: "bg-emerald-600 hover:bg-emerald-700",
+          sceneClass: "warehouse-bg"
+        },
+        context:
+          "Un proveedor promociona un limpiador como 'biodegradable'. El encargado interpreta que por eso no requiere revisar información adicional sobre irritación ocular, incompatibilidades o exposición.",
+        question:
+          "¿Cuál actuación profesional es la más adecuada?",
+        options: [
+          "Concluir que no presenta peligros porque dice biodegradable",
+          "Consultar la SDS para revisar los peligros y controles aplicables",
+          "Usar únicamente la ficha publicitaria",
+          "Eliminar el uso de EPP automáticamente"
+        ],
+        correct: 1,
+        explanation:
+          "Una afirmación comercial como 'biodegradable' no sustituye la información específica de peligros. Para evaluar riesgos y controles debe consultarse la información de seguridad correspondiente."
+      },
+      {
+        id: 5,
+        title: "Carpeta maestra de químicos",
+        subtitle: "Reto de aplicación",
+        icon: "🗂️",
+        xp: 100,
+        theme: {
+          card: "from-amber-100 to-yellow-50",
+          pill: "bg-amber-100 text-amber-800",
+          button: "bg-amber-500 hover:bg-amber-600",
+          sceneClass: "illustration-grid"
+        },
+        context:
+          "La administración de un hotel quiere organizar la documentación de los productos químicos utilizados en limpieza, cocina y mantenimiento. Necesita capacitar sobre uso y, al mismo tiempo, disponer de información de seguridad.",
+        question:
+          "¿Qué práctica documental ofrece la información más completa?",
+        options: [
+          "Mantener solamente las fichas técnicas",
+          "Mantener solamente las SDS",
+          "Mantener TDS y SDS organizadas por producto",
+          "Mantener únicamente las facturas de compra"
+        ],
+        correct: 2,
+        explanation:
+          "Los dos documentos cumplen funciones diferentes y complementarias: la TDS apoya el uso técnico del producto y la SDS la gestión de sus peligros y medidas de seguridad."
+      }
+    ];
+
+    // =========================================================
+    // ESTADO
+    // =========================================================
+
+    let state = {
+      name: "",
+      completed: [],
+      answers: {},
+      xp: 0
+    };
+
+    const STORAGE_KEY = "quest_tds_sds_v1";
+
+    // =========================================================
+    // ELEMENTOS
+    // =========================================================
+
+    const loginScreen = document.getElementById("loginScreen");
+    const appScreen = document.getElementById("appScreen");
+    const participantName = document.getElementById("participantName");
+    const startBtn = document.getElementById("startBtn");
+    const loginError = document.getElementById("loginError");
+
+    const headerName = document.getElementById("headerName");
+    const xpHeader = document.getElementById("xpHeader");
+    const rankLabel = document.getElementById("rankLabel");
+    const rankProgress = document.getElementById("rankProgress");
+    const missionsProgressText = document.getElementById("missionsProgressText");
+    const scoreMini = document.getElementById("scoreMini");
+    const missionGrid = document.getElementById("missionGrid");
+    const completionBadge = document.getElementById("completionBadge");
+
+    const questModal = document.getElementById("questModal");
+    const questPanel = document.getElementById("questPanel");
+
+    const finalModal = document.getElementById("finalModal");
+    const certName = document.getElementById("certName");
+    const certScore = document.getElementById("certScore");
+    const certCorrect = document.getElementById("certCorrect");
+    const certRank = document.getElementById("certRank");
+    const certDate = document.getElementById("certDate");
+    const answerReport = document.getElementById("answerReport");
+
+    // =========================================================
+    // HELPERS
+    // =========================================================
+
+    function escapeHTML(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return false;
+
+        const parsed = JSON.parse(raw);
+
+        if (!parsed || !parsed.name) return false;
+
+        state = {
+          name: parsed.name || "",
+          completed: Array.isArray(parsed.completed) ? parsed.completed : [],
+          answers: parsed.answers || {},
+          xp: Number(parsed.xp || 0)
+        };
+
+        return true;
+      } catch {
+        return false;
+      }
+    }
+
+    function getCorrectCount() {
+      return QUESTS.filter(q => {
+        const answer = state.answers[q.id];
+        return answer && answer.correct === true;
+      }).length;
+    }
+
+    function getScore() {
+      return Math.round((getCorrectCount() / QUESTS.length) * 100);
+    }
+
+    function getRank(score = getScore()) {
+      if (score >= 90) return "Maestro de Seguridad";
+      if (score >= 75) return "Especialista";
+      if (score >= 60) return "Analista";
+      if (score >= 40) return "Explorador Avanzado";
+      return "Explorador";
+    }
+
+    function completedPercent() {
+      return Math.round((state.completed.length / QUESTS.length) * 100);
+    }
+
+    // =========================================================
+    // INICIO
+    // =========================================================
+
+    function startApplication(name) {
+      state.name = name.trim();
+      saveState();
+
+      loginScreen.classList.add("hidden");
+      appScreen.classList.remove("hidden");
+
+      render();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    startBtn.addEventListener("click", () => {
+      const name = participantName.value.trim();
+
+      if (name.length < 2) {
+        loginError.classList.remove("hidden");
+        participantName.focus();
+        return;
+      }
+
+      loginError.classList.add("hidden");
+
+      state = {
+        name,
+        completed: [],
+        answers: {},
+        xp: 0
+      };
+
+      startApplication(name);
+    });
+
+    participantName.addEventListener("keydown", e => {
+      if (e.key === "Enter") startBtn.click();
+    });
+
+    // =========================================================
+    // RENDER
+    // =========================================================
+
+    function render() {
+      const percent = completedPercent();
+      const score = getScore();
+
+      headerName.textContent = state.name;
+      xpHeader.textContent = `${state.xp} / 500`;
+      rankProgress.style.width = `${percent}%`;
+      missionsProgressText.textContent =
+        `${state.completed.length} de ${QUESTS.length} misiones`;
+
+      scoreMini.textContent = `${score} / 100`;
+      rankLabel.textContent = getRank(score);
+
+      if (state.completed.length === QUESTS.length) {
+        completionBadge.classList.remove("hidden");
+      } else {
+        completionBadge.classList.add("hidden");
+      }
+
+      missionGrid.innerHTML = QUESTS.map((quest, index) => {
+        const completed = state.completed.includes(quest.id);
+        const answer = state.answers[quest.id];
+
+        return `
+          <article class="mission-card card-lift rounded-[1.7rem] border border-white shadow-md bg-gradient-to-br ${quest.theme.card} p-5 sm:p-6">
+            <div class="relative z-10">
+              <div class="flex items-start justify-between gap-3">
+                <div class="w-12 h-12 rounded-2xl bg-white shadow flex items-center justify-center text-2xl">
+                  ${quest.icon}
+                </div>
+
+                <span class="px-3 py-1 rounded-full text-xs font-black ${quest.theme.pill}">
+                  ${completed ? "✓ Hecho" : `+${quest.xp} XP`}
+                </span>
+              </div>
+
+              <p class="mt-5 text-[11px] uppercase tracking-[.18em] font-black text-slate-500">
+                Misión ${index + 1}
+              </p>
+
+              <h3 class="mt-1 text-xl font-black">
+                ${quest.title}
+              </h3>
+
+              <p class="mt-1 text-sm text-slate-600">
+                ${quest.subtitle}
+              </p>
+
+              ${
+                completed
+                  ? `
+                    <div class="mt-5 rounded-xl bg-white/75 px-3 py-2 text-sm font-bold ${answer && answer.correct ? "text-emerald-700" : "text-orange-700"}">
+                      ${answer && answer.correct
+                        ? "Respuesta registrada como correcta."
+                        : "Misión completada. Revisa la retroalimentación cuando quieras."}
+                    </div>
+                  `
+                  : ""
+              }
+
+              <button
+                onclick="openQuest(${quest.id})"
+                class="relative z-10 mt-5 w-full rounded-xl px-4 py-3 font-black text-white transition ${
+                  completed
+                    ? "bg-slate-700 hover:bg-slate-800"
+                    : quest.theme.button
+                }"
+              >
+                ${completed ? "Revisar misión" : "Iniciar misión"}
+              </button>
+            </div>
+          </article>
+        `;
+      }).join("");
+    }
+
+    // =========================================================
+    // MODAL DE MISIÓN
+    // =========================================================
+
+    window.openQuest = function(id) {
+      const quest = QUESTS.find(q => q.id === id);
+      if (!quest) return;
+
+      const stored = state.answers[id];
+
+      questPanel.innerHTML = `
+        <div class="${quest.theme.sceneClass}">
+          <div class="p-5 sm:p-7 lg:p-9 min-h-[240px] flex flex-col justify-between relative overflow-hidden">
+            <div class="absolute right-5 top-5 text-6xl opacity-20 float">
+              ${quest.icon}
+            </div>
+
+            <div class="relative">
+              <div class="flex gap-3 flex-wrap items-center">
+                <span class="px-3 py-1.5 rounded-full bg-white/80 border border-white text-xs font-black">
+                  MISIÓN ${quest.id} DE ${QUESTS.length}
+                </span>
+                <span class="px-3 py-1.5 rounded-full ${quest.theme.pill} text-xs font-black">
+                  +${quest.xp} XP
+                </span>
+              </div>
+
+              <h2 class="mt-5 text-2xl sm:text-4xl font-black max-w-3xl">
+                ${quest.title}
+              </h2>
+
+              <p class="mt-2 text-sm sm:text-base text-slate-600 font-semibold">
+                ${quest.subtitle}
+              </p>
+            </div>
+
+            <div class="relative mt-6 rounded-2xl bg-white/80 backdrop-blur border border-white p-4 sm:p-5 max-w-3xl">
+              <div class="flex gap-3">
+                <div class="text-xl">🎬</div>
+                <div>
+                  <p class="text-xs uppercase tracking-[.15em] font-black text-slate-500">
+                    Escenario profesional
+                  </p>
+                  <p class="mt-1 text-sm sm:text-base leading-relaxed text-slate-700">
+                    ${quest.context}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-5 sm:p-7 lg:p-9">
+          <h3 class="font-black text-lg sm:text-xl">
+            ${quest.question}
+          </h3>
+
+          <div id="optionContainer" class="mt-5 space-y-3">
+            ${quest.options.map((option, index) => `
+              <button
+                class="quest-option w-full text-left rounded-2xl border-2 px-4 py-4 transition hover:border-violet-400 hover:bg-violet-50 flex gap-3 items-start
+                  ${
+                    stored && stored.selected === index
+                      ? stored.correct
+                        ? "border-emerald-400 bg-emerald-50"
+                        : "border-orange-400 bg-orange-50"
+                      : "border-slate-200 bg-white"
+                  }"
+                data-index="${index}"
+                ${stored ? "disabled" : ""}
+              >
+                <span class="shrink-0 w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center font-black text-sm">
+                  ${String.fromCharCode(65 + index)}
+                </span>
+                <span class="pt-1 font-semibold text-sm sm:text-base">
+                  ${option}
+                </span>
+              </button>
+            `).join("")}
+          </div>
+
+          <div id="feedbackArea" class="mt-5">
+            ${
+              stored
+                ? feedbackMarkup(quest, stored)
+                : `
+                  <div class="rounded-2xl bg-slate-50 border border-slate-200 p-4 text-sm text-slate-500">
+                    Selecciona una respuesta. Aunque no aciertes, podrás continuar.
+                  </div>
+                `
+            }
+          </div>
+
+          <div class="mt-6 flex flex-col-reverse sm:flex-row gap-3 sm:justify-between">
+            <button
+              onclick="closeQuest()"
+              class="px-5 py-3 rounded-xl border border-slate-200 font-bold text-slate-600 hover:bg-slate-50"
+            >
+              Cerrar
+            </button>
+
+            <button
+              id="continueBtn"
+              onclick="continueFromQuest(${quest.id})"
+              class="${stored ? "" : "hidden"} px-5 py-3 rounded-xl bg-slate-900 text-white font-black hover:bg-slate-800"
+            >
+              ${
+                quest.id === QUESTS.length
+                  ? "Ver resultado final →"
+                  : "Continuar a la siguiente misión →"
+              }
+            </button>
+          </div>
+        </div>
+      `;
+
+      questModal.classList.remove("hidden");
+
+      if (!stored) {
+        questPanel.querySelectorAll(".quest-option").forEach(btn => {
+          btn.addEventListener("click", () => {
+            selectAnswer(quest.id, Number(btn.dataset.index));
+          });
+        });
+      }
+    };
+
+    function feedbackMarkup(quest, answer) {
+      return `
+        <div class="rounded-2xl p-4 sm:p-5 border ${
+          answer.correct
+            ? "bg-emerald-50 border-emerald-200"
+            : "bg-orange-50 border-orange-200"
+        }">
+          <div class="flex gap-3 items-start">
+            <div class="text-2xl">
+              ${answer.correct ? "✅" : "💡"}
+            </div>
+            <div>
+              <p class="font-black ${
+                answer.correct ? "text-emerald-800" : "text-orange-800"
+              }">
+                ${
+                  answer.correct
+                    ? "Respuesta correcta"
+                    : "Misión completada: revisa este punto"
+                }
+              </p>
+
+              <p class="mt-2 text-sm leading-relaxed text-slate-700">
+                ${quest.explanation}
+              </p>
+
+              ${
+                !answer.correct
+                  ? `
+                    <p class="mt-3 text-sm font-bold text-slate-700">
+                      Respuesta de referencia:
+                      <span class="text-violet-700">
+                        ${quest.options[quest.correct]}
+                      </span>
+                    </p>
+                  `
+                  : ""
+              }
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function selectAnswer(questId, selectedIndex) {
+      const quest = QUESTS.find(q => q.id === questId);
+      if (!quest || state.answers[questId]) return;
+
+      const correct = selectedIndex === quest.correct;
+
+      state.answers[questId] = {
+        selected: selectedIndex,
+        selectedText: quest.options[selectedIndex],
+        correct
+      };
+
+      if (!state.completed.includes(questId)) {
+        state.completed.push(questId);
+        state.xp += quest.xp;
+      }
+
+      saveState();
+      render();
+
+      const buttons = questPanel.querySelectorAll(".quest-option");
+      buttons.forEach((btn, index) => {
+        btn.disabled = true;
+
+        if (index === selectedIndex) {
+          btn.classList.remove("border-slate-200", "bg-white");
+
+          if (correct) {
+            btn.classList.add(
+              "border-emerald-400",
+              "bg-emerald-50",
+              "correct-flash"
+            );
+          } else {
+            btn.classList.add(
+              "border-orange-400",
+              "bg-orange-50",
+              "wrong-flash"
+            );
+          }
+        }
+
+        if (index === quest.correct && !correct) {
+          btn.classList.add("border-emerald-300");
+        }
+      });
+
+      document.getElementById("feedbackArea").innerHTML =
+        feedbackMarkup(quest, state.answers[questId]);
+
+      document.getElementById("continueBtn").classList.remove("hidden");
+    }
+
+    window.closeQuest = function() {
+      questModal.classList.add("hidden");
+    };
+
+    window.continueFromQuest = function(currentId) {
+      closeQuest();
+
+      if (currentId === QUESTS.length) {
+        showFinalResults();
+        return;
+      }
+
+      const next = QUESTS.find(q => q.id === currentId + 1);
+
+      if (next) {
+        setTimeout(() => openQuest(next.id), 180);
+      }
+    };
+
+    questModal.addEventListener("click", e => {
+      if (e.target === questModal) closeQuest();
+    });
+
+    // =========================================================
+    // RESULTADO FINAL
+    // =========================================================
+
+    function showFinalResults() {
+      const score = getScore();
+      const correct = getCorrectCount();
+
+      certName.textContent = state.name;
+      certScore.textContent = score;
+      certCorrect.textContent = `${correct}/${QUESTS.length}`;
+      certRank.textContent = getRank(score);
+
+      certDate.textContent = new Intl.DateTimeFormat("es-PA", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric"
+      }).format(new Date());
+
+      answerReport.innerHTML = QUESTS.map((quest, index) => {
+        const answer = state.answers[quest.id];
+
+        return `
+          <article class="rounded-2xl border border-slate-200 bg-white p-4 break-inside-avoid">
+            <div class="flex items-start gap-3">
+              <div class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center font-black text-sm shrink-0">
+                ${index + 1}
+              </div>
+
+              <div class="min-w-0">
+                <h4 class="font-black text-sm sm:text-base">
+                  ${quest.title}
+                </h4>
+
+                <p class="mt-2 text-xs sm:text-sm text-slate-600">
+                  <strong>Pregunta:</strong>
+                  ${quest.question}
+                </p>
+
+                <p class="mt-2 text-xs sm:text-sm text-slate-600">
+                  <strong>Respuesta seleccionada:</strong>
+                  ${answer ? escapeHTML(answer.selectedText) : "Sin respuesta"}
+                </p>
+              </div>
+            </div>
+          </article>
+        `;
+      }).join("");
+
+      finalModal.classList.remove("hidden");
+    }
+
+    document.getElementById("closeFinalBtn").addEventListener("click", () => {
+      finalModal.classList.add("hidden");
+    });
+
+    // =========================================================
+    // REINICIO
+    // =========================================================
+
+    function resetAll() {
+      localStorage.removeItem(STORAGE_KEY);
+
+      state = {
+        name: "",
+        completed: [],
+        answers: {},
+        xp: 0
+      };
+
+      participantName.value = "";
+      finalModal.classList.add("hidden");
+      questModal.classList.add("hidden");
+      appScreen.classList.add("hidden");
+      loginScreen.classList.remove("hidden");
+
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    document.getElementById("resetBtn").addEventListener("click", resetAll);
+    document.getElementById("restartFinalBtn").addEventListener("click", resetAll);
+
+    // =========================================================
+    // RECUPERACIÓN DE SESIÓN
+    // =========================================================
+
+    window.addEventListener("DOMContentLoaded", () => {
+      const restored = loadState();
+
+      if (restored && state.name) {
+        loginScreen.classList.add("hidden");
+        appScreen.classList.remove("hidden");
+        render();
+
+        if (state.completed.length === QUESTS.length) {
+          setTimeout(showFinalResults, 500);
+        }
+      }
+    });
+
+    // =========================================================
+    // ESCAPE
+    // =========================================================
+
+    document.addEventListener("keydown", e => {
+      if (e.key === "Escape") {
+        if (!questModal.classList.contains("hidden")) {
+          closeQuest();
+        } else if (!finalModal.classList.contains("hidden")) {
+          finalModal.classList.add("hidden");
+        }
+      }
+    });
+  </script>
+</body>
+</html>
